@@ -95,12 +95,12 @@ functor MonoBufferFn (
   (* ensure that the content array has space for amt elements *)
     fun ensureCapacity (content, len, amt) = let
           val curCap = A.length(!content)
-          val amt = Int.max(curCap - len + curCap, amt)
-          val capacity = (len + amt) handle Overflow => maxLen
+          val ensCap = (len + amt) handle Overflow => maxLen
           in
-            if (curCap < capacity)
+            if (curCap < ensCap)
               then let
-                val newArr = A.array(capacity, defaultElem)
+                val newCap = Int.max(2 * curCap handle Overflow => maxLen, ensCap)
+                val newArr = A.array(newCap, defaultElem)
                 in
                   AS.copy{dst = newArr, di = 0, src = AS.slice(!content, 0, SOME len)};
                   content := newArr
